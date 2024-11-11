@@ -1,0 +1,142 @@
+select * from stg_churn
+
+-----------------------------------------------------------------------------------------------DATA EXPLORATION-----------------------------------------------------------------------------------------------------------------------
+
+select Gender, count (Gender) as TotalCount,
+count(Gender) * 100.0/(select count(*) from stg_churn)as Percentage
+From stg_churn
+Group by Gender
+
+
+
+select Contract, count(Contract) as TotalCount,
+count(Contract)*100.0/(select count(*) from stg_churn) as Percentage
+From stg_churn
+Group by Contract
+
+
+select Customer_Status, count(Customer_Status) as TotalCount,sum(Total_Revenue)as TotalRev,
+Sum(Total_Revenue)/(select sum(Total_Revenue) from stg_churn)*100 as RevPercentage
+From stg_churn
+Group by Customer_Status
+
+select State, count(State) as  TotalCount,
+count(state)*100.0/(select count(*) from stg_churn) as percentage
+from stg_churn
+group by State
+order by percentage desc
+
+
+select Distinct Internet_Type
+from stg_churn
+
+
+------IDENTIFYING THE COUNT OF NULL VALUES IN EACH COLUMN-----
+
+
+
+Select
+      sum(case when Customer_ID is NULL Then 1 Else 0 end) as Customer_ID_NUll_Count,
+	  sum(case when Gender is NULL Then 1 Else 0 end)as Gender_Null_Count,
+	  sum(case when Age is NULL Then 1 Else 0 end)as Age_Null_Count,
+      sum(case when Married is NULL Then 1 Else 0 end) as Married_NUll_Count,
+	  sum(case when State is NULL Then 1 Else 0 end)as State_Null_Count,
+	  sum(case when Number_of_Referrals is NULL Then 1 Else 0 end)as Number_of_Referrals_Null_Count,
+	  sum(case when Tenure_in_Months is NULL Then 1 Else 0 end) as Tenure_in_Months_NUll_Count,
+	  sum(case when Value_Deal is NULL Then 1 Else 0 end)as Value_Deal_Null_Count,
+	  sum(case when Phone_Service is NULL Then 1 Else 0 end)as Phone_Service_Null_Count,
+      sum(case when Multiple_Lines is NULL Then 1 Else 0 end) as Multiple_Lines_NUll_Count,
+	  sum(case when Internet_Service is NULL Then 1 Else 0 end)as Internet_Service_Null_Count,
+	  sum(case when Internet_Type is NULL Then 1 Else 0 end)as Internet_Type_Null_Count,
+      sum(case when Online_Security is NULL Then 1 Else 0 end) as Online_Security_NUll_Count,
+	  sum(case when Online_Backup is NULL Then 1 Else 0 end)as Online_Backup_Null_Count,
+	  sum(case when Device_Protection_Plan is NULL Then 1 Else 0 end)as Device_Protection_Plan_Null_Count,
+      sum(case when Premium_Support is NULL Then 1 Else 0 end) as Premium_Support_NUll_Count,
+	  sum(case when Streaming_TV is NULL Then 1 Else 0 end)as Streaming_TV_Null_Count,
+	  sum(case when Streaming_Movies is NULL Then 1 Else 0 end)as Streaming_Movies_Null_Count,
+	  sum(case when Streaming_Music is NULL Then 1 Else 0 end) as Streaming_Music_NUll_Count,
+	  sum(case when Unlimited_Data is NULL Then 1 Else 0 end)as Unlimited_Data_Null_Count,
+	  sum(case when Contract is NULL Then 1 Else 0 end)as Contract_Null_Count,
+      sum(case when Paperless_Billing is NULL Then 1 Else 0 end) as Paperless_Billing_NUll_Count,
+	  sum(case when Payment_Method is NULL Then 1 Else 0 end)as Payment_Method_Null_Count,
+	  sum(case when Monthly_Charge is NULL Then 1 Else 0 end)as Monthly_Charge_Null_Count,
+	  sum(case when Total_Charges is NULL Then 1 Else 0 end)as Total_Charges_Null_Count,
+	  sum(case when Total_Refunds is NULL Then 1 Else 0 end)as Total_Refunds_Null_Count,
+	  sum(case when Total_Extra_Data_Charges is NULL Then 1 Else 0 end) as Total_Extra_Data_Charges_NUll_Count,
+	  sum(case when Total_Long_Distance_Charges is NULL Then 1 Else 0 end)as Total_Long_Distance_Charges_Null_Count,
+	  sum(case when Total_Revenue is NULL Then 1 Else 0 end)as Total_Revenue_Null_Count,
+      sum(case when Customer_Status is NULL Then 1 Else 0 end) as Customer_Status_NUll_Count,
+	  sum(case when Churn_Category is NULL Then 1 Else 0 end)as Churn_Category_Null_Count,
+	  sum(case when Churn_Reason is NULL Then 1 Else 0 end)as Churn_Reason_Null_Count
+
+From stg_churn;
+
+
+
+
+---------------------------------------------------------------------------------REPLACING THE NULL VAUES WITH NO OR NONE KEYS---------------------------------------------------------------------------------
+
+
+
+
+select
+      Customer_ID,
+	  Gender,
+	  Age,
+	  Married,
+	  State,
+	  Number_of_Referrals,
+	  Tenure_in_Months,
+	  ISNULL(Value_Deal, 'None')as Value_Deal,
+	  Phone_Service,
+	  ISNULL(Multiple_Lines, 'No') as Multiple_Lines,
+	  Internet_Service,
+	  ISNULL(Internet_Type, 'No') as Internet_Type,
+      ISNULL(Online_Security, 'No') AS Online_Security,
+      ISNULL(Online_Backup, 'No') AS Online_Backup,
+      ISNULL(Device_Protection_Plan, 'No') AS Device_Protection_Plan,
+      ISNULL(Premium_Support, 'No') AS Premium_Support,
+      ISNULL(Streaming_TV, 'No') AS Streaming_TV,
+      ISNULL(Streaming_Movies, 'No') AS Streaming_Movies,
+      ISNULL(Streaming_Music, 'No') AS Streaming_Music,
+      ISNULL(Unlimited_Data, 'No') AS Unlimited_Data,
+	  Contract,
+	  Paperless_Billing,
+	  Payment_Method,
+	  Monthly_Charge,
+	  Total_Charges,
+	  Total_Refunds,
+	  Total_Extra_Data_Charges,
+	  Total_Long_Distance_Charges,
+	  Customer_Status,
+	  ISNULL(Churn_Category, 'others')as Churn_Category,
+	  ISNULL(Churn_Reason, 'Others') as Churn_Reason
+
+
+
+----------STORING IT FROM STG CHURN TO PROD CHURN------------------
+
+Into[db_Churn].[dbo].[prod_churn]
+from[db_Churn].[dbo].[stg_churn]
+
+
+
+------------------------------------------------------------------------VIEW OF CHURNED AND JOIN IS CREATED TO USED THIS DATA WHILE PREDICTION------------------------------------------------------------------------
+
+
+--view= to create a virtual table in a database that displays data from one or more tables through a predfined query.---
+
+
+Create View vw_ChurnData as 
+      select * from prod_churn where Customer_Status IN('Churned','Stayed')
+
+
+Create View vw_JoinData as 
+      select * from prod_churn where Customer_Status IN('Joined')
+
+
+
+
+
+
+
